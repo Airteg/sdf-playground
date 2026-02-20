@@ -4,7 +4,7 @@ import { Dimensions, StyleSheet, View } from "react-native";
 
 const { width, height } = Dimensions.get("window");
 
-const sksl = `
+const sksl = /* glsl */ `
 uniform vec2 resolution;
 
 // 1. Формула кола (повертає відстань від центру)
@@ -46,7 +46,7 @@ vec4 main(vec2 fragCoord) {
     return vec4(col, 1.0);
 }
 `;
-const test1 = `
+const test1 = /* glsl */ `
   // uniform vec2 resolution; 
   // Залишаємо наш "пін" для часу
   // Замість void main() ми пишемо vec4 main(), 
@@ -57,26 +57,30 @@ const test1 = `
     // Замість присвоєння глобальній змінній, ми просто повертаємо колір
     return vec4(1.0, 0.0, 0.0, 1.0); 
 }`;
-const test2 = `
-  // Оголошуємо наші "піни" для прийому даних
-  uniform vec2 u_resolution; // Розмір екрану
-  uniform vec3 u_myColor;    // Наш кастомний колір з JS
+const test2 = /* glsl */ ``;
 
-  vec4 main(vec2 fragCoord) {
-    // Ділимо поточний піксель (наприклад 195) на ширину екрану (390).
-    // Отримуємо значення від 0.0 (лівий край) до 1.0 (правий край).
-    float xPercent = fragCoord.x / u_resolution.x;
+const test3 = /* glsl */ `
+uniform float2 u_resolution;
 
-    // Множимо наш колір на цей відсоток. 
-    // Зліва він буде чорним (множимо на 0), справа - повним (множимо на 1).
-    vec3 finalColor = u_myColor * xPercent;
+half4 main(float2 fragCoord) {
 
-    return vec4(finalColor, 1.0); 
-  }
+    float2 uv = fragCoord / u_resolution;
+float2 p = uv - 0.5;
+
+// корекція aspect ratio
+p.x *= u_resolution.x / u_resolution.y;
+
+float r = 0.3;
+float d = length(p) - r;
+
+if (d < 0.0) {
+    return half4(1.0, 0.0, 0.0, 1.0);
+}
+return half4(0.0, 0.0, 0.0, 1.0);}
 `;
-const test3 = ``;
+
 // Правильний виклик фабрики шейдерів через глобальний об'єкт Skia
-const effect = Skia.RuntimeEffect.Make(test2);
+const effect = Skia.RuntimeEffect.Make(test3);
 
 export default function App() {
   // Перевірка на випадок синтаксичної помилки в самому SkSL коді
@@ -92,8 +96,7 @@ export default function App() {
           <Shader
             source={effect}
             uniforms={{
-              u_resolution: [width, height], // Передаємо масив з 2 чисел
-              u_myColor: [0.0, 1.0, 0.5], // Передаємо масив з 3 чисел (зеленуватий)
+              u_resolution: [width, height],
             }}
           />
         </Fill>
