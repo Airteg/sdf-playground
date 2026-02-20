@@ -1,0 +1,11 @@
+// kind=shader
+uniform float2 u_resolution;
+
+half4 main(float2 fragCoord) {
+
+    float x = 0.5;
+    float y = 0.1;
+    float2 v = float2(x, y);
+
+    return half4(v.x, v.y, 0.0, 1.0);
+}
