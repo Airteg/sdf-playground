@@ -1,0 +1,24 @@
+// kind=shader
+uniform float2 u_resolution;
+uniform float  u_time;
+
+half4 main(float2 fragCoord) {
+    // 1. Оголошуємо змінну (виділяємо пам'ять)
+    float2 uv;
+
+    // 2. Просто присвоюємо значення в уже існуючу комірку X
+    uv.x = (fragCoord.x - 0.5 * u_resolution.x) / u_resolution.y;
+
+    // 3. Просто присвоюємо значення в уже існуючу комірку Y
+    uv.y = (fragCoord.y - 0.5 * u_resolution.y) / u_resolution.y;
+    
+    // Знаходимо відстань від центру
+    float dist = abs (length(uv)-0.2);
+    
+    // Малюємо коло. Радіус 0.3 тепер означає "30% від ВИСОТИ екрана", 
+    // і він буде однаковим в усіх напрямках!
+    float mask = step(0.0004, dist); // 0.1 - товщина обводки, 0.2 - радіус кола
+    float circle = 1.0 - mask;
+    
+    return half4(0.0, circle, 0.0, 0.0);
+}
