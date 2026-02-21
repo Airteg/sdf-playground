@@ -4,17 +4,30 @@ import {
   Shader,
   SkRuntimeEffect,
 } from "@shopify/react-native-skia";
-import { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Text, View } from "react-native";
 
 type Props = {
-  effect: SkRuntimeEffect | null; // Тепер приймаємо і null теж
+  effect: SkRuntimeEffect;
 };
 
 export function ShaderCanvas({ effect }: Props) {
   const [resolution, setResolution] = useState<[number, number] | null>(null);
+  const [t0] = useState(() => Date.now());
+  const [now, setNow] = useState(() => Date.now());
 
-  // Якщо шейдер не скомпілювався
+  // простий таймер для u_time (секунди)
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 16);
+    return () => clearInterval(id);
+  }, []);
+
+  const uniforms = useMemo(() => {
+    if (!resolution) return null;
+    const u_time = (now - t0) / 1000;
+    return { u_resolution: resolution, u_time };
+  }, [resolution, now, t0]);
+
   if (!effect) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -26,15 +39,14 @@ export function ShaderCanvas({ effect }: Props) {
   return (
     <View
       style={{ flex: 1 }}
-      onLayout={(e) =>
-        setResolution([e.nativeEvent.layout.width, e.nativeEvent.layout.height])
-      }
+      onLayout={(e) => {
+        const { width, height } = e.nativeEvent.layout;
+        setResolution([Math.round(width), Math.round(height)]);
+      }}
     >
       <Canvas style={{ flex: 1 }}>
         <Fill>
-          {resolution && (
-            <Shader source={effect} uniforms={{ u_resolution: resolution }} />
-          )}
+          {uniforms && <Shader source={effect} uniforms={uniforms} />}
         </Fill>
       </Canvas>
     </View>

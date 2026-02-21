@@ -3,7 +3,7 @@ uniform float2 u_resolution;
 uniform float  u_time;
 
 half4 main(float2 fragCoord) {
-    
     float2 uv = fragCoord / u_resolution;
-    return half4(uv.x, uv.y, 0.0, 1.0);
+    float pulse = 0.5 + 0.5 * sin(u_time * 2.0);
+    return half4(pulse, uv.x, uv.y, 1.0);
 }

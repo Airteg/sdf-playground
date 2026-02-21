@@ -3,7 +3,11 @@ uniform float2 u_resolution;
 uniform float  u_time;
 
 half4 main(float2 fragCoord) {
-    
+
     float2 uv = fragCoord / u_resolution;
-    return half4(uv.x, uv.y, 0.0, 1.0);
+
+    // міняємо осі місцями
+    float2 swapped = uv.yx;
+
+    return half4(swapped.x, swapped.y, 0.0, 1.0);
 }
