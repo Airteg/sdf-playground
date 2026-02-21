@@ -4,49 +4,49 @@ import {
   Shader,
   SkRuntimeEffect,
 } from "@shopify/react-native-skia";
-import React, { useEffect, useMemo, useState } from "react";
-import { Text, View } from "react-native";
+import React from "react";
+import { View } from "react-native";
+import {
+  useDerivedValue,
+  useFrameCallback,
+  useSharedValue,
+} from "react-native-reanimated";
 
 type Props = {
   effect: SkRuntimeEffect;
 };
 
 export function ShaderCanvas({ effect }: Props) {
-  const [resolution, setResolution] = useState<[number, number] | null>(null);
-  const [t0] = useState(() => Date.now());
-  const [now, setNow] = useState(() => Date.now());
+  const res = useSharedValue<[number, number]>([0, 0]);
+  const ready = useSharedValue(false);
 
-  // простий таймер для u_time (секунди)
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 16);
-    return () => clearInterval(id);
-  }, []);
+  const time = useSharedValue(0);
 
-  const uniforms = useMemo(() => {
-    if (!resolution) return null;
-    const u_time = (now - t0) / 1000;
-    return { u_resolution: resolution, u_time };
-  }, [resolution, now, t0]);
+  useFrameCallback((frameInfo) => {
+    time.value = (frameInfo.timeSinceFirstFrame ?? 0) / 1000;
+  });
 
-  if (!effect) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text>Помилка компіляції шейдера</Text>
-      </View>
-    );
-  }
+  const uniforms = useDerivedValue(() => {
+    return {
+      u_resolution: res.value,
+      u_time: time.value,
+    };
+  });
 
   return (
     <View
       style={{ flex: 1 }}
       onLayout={(e) => {
         const { width, height } = e.nativeEvent.layout;
-        setResolution([Math.round(width), Math.round(height)]);
+        res.value = [Math.round(width), Math.round(height)];
+        ready.value = true;
       }}
     >
       <Canvas style={{ flex: 1 }}>
         <Fill>
-          {uniforms && <Shader source={effect} uniforms={uniforms} />}
+          {/* Рендеримо тільки коли є layout */}
+          {/* ready — shared value, але тут можна просто перевіряти width/height > 0 */}
+          <Shader source={effect} uniforms={uniforms} />
         </Fill>
       </Canvas>
     </View>
