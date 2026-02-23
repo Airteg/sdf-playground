@@ -1,7 +1,9 @@
 // kind=shader
+// Вставляй цей блок у КОЖЕН .sksl (на початок), щоб отримати debug helpers.
+
+// ---- Playground uniforms (стандартні для всіх шейдерів) ----
 uniform float  u_time;
 uniform float2 u_resolution;
-
 uniform float2 u_mouse;     // x,y в пікселях. (-1,-1) коли неактивно
 
 uniform float u_p1;
@@ -74,23 +76,4 @@ half4 dbgShowValue(float value) {
   // RGB: корисно коли ти хочеш одразу 3 числа (але тут для 1 числа зробимо "канал")
   float v = dbg01(value);
   return half4(v, 0.0, 0.0, 1.0);
-}
-half4 main(float2 fragCoord) {
-  float2 uv = (fragCoord - 0.5 * u_resolution) / u_resolution.x;
-  float2 q = abs(uv);
-  float dist = max(q.x, q.y);
-  float mask = step(0.3, dist);
-  float square = 1.0 - mask;
-
-  // debug routing
-  if (u_debugMode == 2) return dbgShowUV(fragCoord);
-  if (u_debugMode == 3) return dbgShowGrid(fragCoord);
-
-  if (u_debugMode == 1) {
-    // "лог": що показуємо
-    return dbgShowValue(dist);   // спробуй dist для початку
-  }
-
-  // normal render
-  return half4(square, 0.0, 0.0, 1.0);
 }
