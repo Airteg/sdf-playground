@@ -1,0 +1,24 @@
+// kind=shader
+uniform float  u_time;
+uniform float2 u_resolution;
+
+half4 main(float2 fragCoord) {
+    // 1. Нормалізація координат (центр у 0.0, пропорції збережені)
+    float2 uv = (fragCoord - 0.5 * u_resolution) / u_resolution.x;
+
+    // 2. Віддзеркалюємо всі 4 чверті екрана в одну додатну (правий верхній кут)
+    float2 q = abs(uv);
+
+    // 3. Рахуємо квадратну SDF (відстань до найдальшої межі)
+    float dist = max(q.x, q.y);
+
+    // 4. Запускаємо компаратор! Поріг = 0.3 (наш розмір)
+    // Всередині квадрата (dist < 0.3) mask буде 0.0
+    // Зовні квадрата (dist >= 0.3) mask буде 1.0
+    float mask = step(0.3, dist);
+
+    // 5. Інвертуємо маску, щоб фігура світилася, а фон був чорним
+    float square = 1.0 - mask;
+
+    return half4(square, 0.0, 0.0, 1.0); // Червоний квадрат
+}
