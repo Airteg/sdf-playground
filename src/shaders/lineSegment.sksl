@@ -1,0 +1,43 @@
+// kind=shader
+uniform float  u_time;
+uniform float2 u_resolution;
+
+// Задаємо число Пі для зручності (півкола)
+const float PI = 3.14159265359;
+
+half4 main(float2 fragCoord) {
+    float2 uv = (fragCoord - 0.5 * u_resolution) / u_resolution.y;
+
+    // 1. Початок відрізка
+    float2 a = float2(0.0, 0.0);
+    
+    // 2. Задаємо довжину і кут
+    float len = 0.3;
+    
+    // Наприклад, кут 45 градусів (це PI / 4)
+    // Якщо хочеш 90 градусів (вертикально), напиши PI / 2.0
+    float angle = -PI / 4.0; 
+
+    // 3. ПЕРЕТВОРЕННЯ: Знаходимо точку B через кут
+    // Тут ми генеруємо напрямок
+    float2 b = float2(
+        len * cos(u_time + angle),
+        len * sin(u_time + angle)
+    );
+
+    // ==========================================
+    // ДАЛІ - НАША ЗНАЙОМА МАТЕМАТИКА ВІДРІЗКА
+    // ==========================================
+    float2 ab = b - a; 
+    float2 ap = uv - a;
+
+    float t = dot(ap, ab) / dot(ab, ab);
+    t = clamp(t, 0.0, 1.0);
+
+    float2 closestPoint = a + ab * t;
+    float dist = length(uv - closestPoint);
+
+    float mask = 1.0 - step(0.001, dist);
+
+    return half4(mask, mask, mask, 1.0);
+}

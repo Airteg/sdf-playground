@@ -1,0 +1,13 @@
+// kind=shader
+uniform float  u_time;
+uniform float2 u_resolution;
+
+half4 main(float2 fragCoord) {
+
+    float2 uv = fragCoord / u_resolution;
+
+    // міняємо осі місцями
+    float2 s = uv.yx;
+
+    return half4(mix(s.y,s.x,0.5), mix(uv.x,uv.y,0.2), min(s.x,s.y), 1.0);
+}

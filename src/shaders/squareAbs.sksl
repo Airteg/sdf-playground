@@ -1,0 +1,28 @@
+// kind=shader
+uniform float  u_time;
+uniform float2 u_resolution;
+
+half4 main(float2 fragCoord) {
+// 1. Задаємо абсолютні координати та розмір у пікселях
+    float startX = 100.0;
+    float startY = 150.0;
+    float size = 200.0;
+
+    // 2. Перевіряємо межі по осі X (ліва та права)
+    // Якщо fragCoord.x >= 100.0, leftEdge = 1.0, інакше 0.0
+    float leftEdge = step(startX, fragCoord.x); 
+    // Якщо fragCoord.x < 300.0, rightEdge = 1.0, інакше 0.0
+    float rightEdge = 1.0 - step(startX + size, fragCoord.x); 
+
+    // 3. Перевіряємо межі по осі Y (верхня та нижня)
+    float topEdge = step(startY, fragCoord.y);
+    float bottomEdge = 1.0 - step(startY + size, fragCoord.y);
+
+    // 4. Логічне "І" (AND) для відеокарти
+    // Множення працює як збіг усіх умов. 
+    // Якщо піксель хоча б з одного боку вийшов за межі, ми множимо на 0.0, і mask = 0.0
+    float mask = leftEdge * rightEdge * topEdge * bottomEdge;
+
+    // 5. Виводимо колір
+    return half4(mask, 0.0, 0.0, 1.0); // Червоний квадрат
+}
