@@ -2,7 +2,7 @@ import { Skia, SkRuntimeEffect } from "@shopify/react-native-skia";
 import React from "react";
 import { ShaderCanvas } from "./src/ShaderCanvas";
 
-import shaderSource from "./src/shaders/shaderThinking.sksl";
+import shaderSource from "./src/shaders/sphere3D.sksl";
 // import shaderSource from "./src/shaders/square.sksl";
 // import shaderSource from "./src/shaders/circle.sksl";
 // import shaderSource from "./src/shaders/gradient.sksl";
